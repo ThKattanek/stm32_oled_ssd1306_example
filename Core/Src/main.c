@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "./ssd1306_lib.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,6 +94,72 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   ssd1306_init_display(&hi2c1, 0x78);
+  ssd1306_set_contrast(0xff);
+
+  uint8_t x,y;
+
+  for(y=0; y<DISPLAY_HEIGTH; y++)
+  {
+	  for(x=0; x<DISPLAY_WIDTH; x++)
+	  {
+		  ssd1306_set_pixel_to_display(x, y);
+	  }
+  }
+
+  for(y=0; y<DISPLAY_HEIGTH; y++)
+  {
+	  for(x=0; x<DISPLAY_WIDTH; x++)
+		  ssd1306_clear_pixel_to_display(x, y);
+  }
+
+  for(x=0; x<DISPLAY_WIDTH; x++)
+  {
+	  for(y=0; y<DISPLAY_HEIGTH; y++)
+	  {
+		  ssd1306_set_pixel_to_display(x, y);
+	  }
+  }
+
+  for(x=0; x<DISPLAY_WIDTH; x++)
+  {
+	  for(y=0; y<DISPLAY_HEIGTH; y++)
+		  ssd1306_clear_pixel_to_display(x, y);
+  }
+
+  ///////////////////////////////////////////////
+
+  for(y=0; y<DISPLAY_HEIGTH; y++)
+  {
+	  for(x=0; x<DISPLAY_WIDTH; x++)
+	  {
+		  ssd1306_set_pixel_to_buffer(x, y);
+	  }
+  }
+  ssd1306_transfer_buffer();
+
+  for(y=0; y<DISPLAY_HEIGTH; y++)
+  {
+	  for(x=0; x<DISPLAY_WIDTH; x++)
+		  ssd1306_clear_pixel_to_buffer(x, y);
+  }
+  ssd1306_transfer_buffer();
+
+  for(x=0; x<DISPLAY_WIDTH; x++)
+  {
+	  for(y=0; y<DISPLAY_HEIGTH; y++)
+	  {
+		  ssd1306_set_pixel_to_buffer(x, y);
+	  }
+  }
+  ssd1306_transfer_buffer();
+
+  for(x=0; x<DISPLAY_WIDTH; x++)
+  {
+	  for(y=0; y<DISPLAY_HEIGTH; y++)
+		  ssd1306_clear_pixel_to_buffer(x, y);
+  }
+  ssd1306_transfer_buffer();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -167,7 +233,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;

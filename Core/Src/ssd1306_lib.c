@@ -7,13 +7,10 @@
 
 #include "./ssd1306_lib.h"
 
-I2C_HandleTypeDef *hi2c1;		// pointer to i2c struct
-uint16_t display_xw;			// display
+static I2C_HandleTypeDef *i2c_handle;	// pointer to i2c struct
+static uint8_t i2c_address;			// ic2 display address
 
-I2C_HandleTypeDef *i2c_handle;	// pointer to i2c struct
-uint8_t i2c_address;			// ic2 display address
-
-uint8_t display_buffer[LCD_WIDTH * LCD_HEIGTH / 8];
+static uint8_t display_buffer[DISPLAY_WIDTH * DISPLAY_HEIGTH ];
 
 void ssd1306_send_command(uint8_t c)
 {
@@ -41,14 +38,14 @@ void ssd1306_set_colAddress(void)
 {
   ssd1306_send_command(SSD1306_COLUMNADDR); // 0x21 COMMAND
   ssd1306_send_command(0); // Column start address
-  ssd1306_send_command(LCD_WIDTH-1); // Column end address
+  ssd1306_send_command(DISPLAY_WIDTH-1); // Column end address
 }
 
 void ssd1306_set_pageAddress(void)
 {
   ssd1306_send_command(SSD1306_PAGEADDR); // 0x22 COMMAND
   ssd1306_send_command(0); // Start Page address
-  ssd1306_send_command((LCD_HEIGTH/8)-1);// End Page address
+  ssd1306_send_command((DISPLAY_HEIGTH/8)-1);// End Page address
 }
 
 void ssd1306_init_display(I2C_HandleTypeDef *_i2c_handle, uint8_t _i2c_address)
@@ -112,17 +109,18 @@ void ssd1306_transfer_buffer(void)
 	ssd1306_set_pageAddress();
 
   	display_buffer[0] = 0x40;
-  	HAL_I2C_Master_Transmit(i2c_handle, i2c_address, display_buffer, LCD_WIDTH * LCD_HEIGTH / 8 + 1, 100);
+  	HAL_I2C_Master_Transmit(i2c_handle, i2c_address, display_buffer, DISPLAY_WIDTH * DISPLAY_HEIGTH / 8 + 1, 1000);
 }
 
 void ssd1306_clear_display(void)
 {
-	uint8_t* buffer = ssd1306_get_display_buffer();
-	int i;
-	for(i=0; i<LCD_WIDTH * LCD_HEIGTH / 8; i++)
-		buffer[i] = 0;
-
+	memset(display_buffer + 1,0,DISPLAY_WIDTH * DISPLAY_HEIGTH / 8);
 	ssd1306_transfer_buffer();
+}
+
+void ssd1306_clear_buffer(void)
+{
+	memset(display_buffer + 1,0,DISPLAY_WIDTH * DISPLAY_HEIGTH / 8);
 }
 
 void ssd1306_set_contrast(uint8_t value)
@@ -139,3 +137,72 @@ void ssd1306_enable_invertmode(uint8_t value)
 		ssd1306_send_command(SSD1306_INVERTDISPLAY);
 }
 
+void ssd1306_set_pixel_to_display(uint8_t x, uint8_t y)
+{
+	if(x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGTH)
+		return;
+
+	uint8_t col = x;
+	uint8_t page = y >> 3;	// /8
+
+	// COL Addressing
+	ssd1306_send_command(SSD1306_COLUMNADDR);
+	ssd1306_send_command(col); 			// Column start address
+	ssd1306_send_command(DISPLAY_WIDTH-1); 	// Column end address
+
+	// Page Addressing
+	ssd1306_send_command(SSD1306_PAGEADDR); // 0x22 COMMAND
+	ssd1306_send_command(page); // Start Page address
+	ssd1306_send_command((DISPLAY_HEIGTH/8)-1);// End Page address
+
+	uint16_t buffer_index = page * DISPLAY_WIDTH + x + 1;
+	uint8_t c = display_buffer[buffer_index];
+
+	c |= 1 << (y%8);
+
+	display_buffer[buffer_index] = c;
+
+  	ssd1306_send_data(c);
+}
+
+void ssd1306_clear_pixel_to_display(uint8_t x, uint8_t y)
+{
+	if(x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGTH)
+		return;
+
+	uint8_t col = x;
+	uint8_t page = y >> 3;	// /8
+
+	// COL Addressing
+	ssd1306_send_command(SSD1306_COLUMNADDR);
+	ssd1306_send_command(col); 			// Column start address
+	ssd1306_send_command(DISPLAY_WIDTH-1); 	// Column end address
+
+	// Page Addressing
+	ssd1306_send_command(SSD1306_PAGEADDR); // 0x22 COMMAND
+	ssd1306_send_command(page); // Start Page address
+	ssd1306_send_command(page);// End Page address
+
+	uint16_t buffer_index = page * DISPLAY_WIDTH + x + 1;
+	uint8_t c = display_buffer[buffer_index];
+	c &= ~(1 << (y%8));
+	display_buffer[buffer_index] = c;
+
+  	ssd1306_send_data(c);
+}
+
+void ssd1306_set_pixel_to_buffer(uint8_t x, uint8_t y)
+{
+	if(x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGTH)
+		return;
+
+	display_buffer[(y >> 3) * DISPLAY_WIDTH + x + 1] |= 1 << (y%8);
+}
+
+void ssd1306_clear_pixel_to_buffer(uint8_t x, uint8_t y)
+{
+	if(x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGTH)
+		return;
+
+	display_buffer[(y >> 3) * DISPLAY_WIDTH + x + 1] &= ~(1 << (y%8));
+}

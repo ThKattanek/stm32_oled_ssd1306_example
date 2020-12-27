@@ -11,8 +11,8 @@
 #include <stm32f4xx_hal.h>
 
 // LCD Config
-#define LCD_WIDTH 128
-#define LCD_HEIGTH 64
+#define DISPLAY_WIDTH 128
+#define DISPLAY_HEIGTH 64
 
 // LCD SSD1306 Commands
 #define SSD1306_SETCONTRAST   		0x81
@@ -50,5 +50,12 @@ void ssd1306_transfer_buffer(void);
 void ssd1306_clear_display(void);
 void ssd1306_set_contrast(uint8_t value);
 void ssd1306_enable_invertmode(uint8_t value);
+
+// GFX Functions
+void ssd1306_set_pixel_to_display(uint8_t x, uint8_t y);	// Set Pixel direct to display
+void ssd1306_clear_pixel_to_display(uint8_t x, uint8_t y);	// Clear Pixel direct to display
+
+void ssd1306_set_pixel_to_buffer(uint8_t x, uint8_t y);	// Set Pixel direct to display
+void ssd1306_clear_pixel_to_buffer(uint8_t x, uint8_t y);	// Clear Pixel direct to display
 
 #endif /* SRC_SSD1306_LIB_H_ */
