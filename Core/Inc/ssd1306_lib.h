@@ -47,5 +47,8 @@ void ssd1306_set_colAddress(void);
 void ssd1306_set_pageAddress(void);
 void ssd1306_init_display(I2C_HandleTypeDef *i2c_handle, uint8_t i2c_address);
 void ssd1306_transfer_buffer(void);
+void ssd1306_clear_display(void);
+void ssd1306_set_contrast(uint8_t value);
+void ssd1306_enable_invertmode(uint8_t value);
 
 #endif /* SRC_SSD1306_LIB_H_ */

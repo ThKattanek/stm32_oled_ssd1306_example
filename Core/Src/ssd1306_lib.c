@@ -125,3 +125,17 @@ void ssd1306_clear_display(void)
 	ssd1306_transfer_buffer();
 }
 
+void ssd1306_set_contrast(uint8_t value)
+{
+	ssd1306_send_command(SSD1306_SETCONTRAST);
+	ssd1306_send_command(value);
+}
+
+void ssd1306_enable_invertmode(uint8_t value)
+{
+	if(value == 0)
+		ssd1306_send_command(SSD1306_NORMALDISPLAY);
+	else
+		ssd1306_send_command(SSD1306_INVERTDISPLAY);
+}
+
