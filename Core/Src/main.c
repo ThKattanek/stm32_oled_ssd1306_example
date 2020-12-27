@@ -45,7 +45,6 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,73 +91,36 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+
   /* USER CODE BEGIN 2 */
   ssd1306_init_display(&hi2c1, 0x78);
-  ssd1306_set_contrast(0xff);
+  ssd1306_set_contrast(0x01);
 
-  uint8_t x,y;
+  srand(time(0));
 
-  for(y=0; y<DISPLAY_HEIGTH; y++)
+  // for sarfild
+  struct{
+	  uint8_t x;
+	  uint8_t y;
+  }typedef point;
+
+  #define STAR_COUNT 40
+
+  point s1[STAR_COUNT];
+  point s2[STAR_COUNT];
+  point s3[STAR_COUNT];
+
+  for(int i=0; i<STAR_COUNT; i++)
   {
-	  for(x=0; x<DISPLAY_WIDTH; x++)
-	  {
-		  ssd1306_set_pixel_to_display(x, y);
-	  }
-  }
+	  s1[i].x = rand()%DISPLAY_WIDTH;
+	  s1[i].y = rand()%DISPLAY_HEIGTH;
 
-  for(y=0; y<DISPLAY_HEIGTH; y++)
-  {
-	  for(x=0; x<DISPLAY_WIDTH; x++)
-		  ssd1306_clear_pixel_to_display(x, y);
-  }
+	  s2[i].x = rand()%DISPLAY_WIDTH;
+	  s2[i].y = rand()%DISPLAY_HEIGTH;
 
-  for(x=0; x<DISPLAY_WIDTH; x++)
-  {
-	  for(y=0; y<DISPLAY_HEIGTH; y++)
-	  {
-		  ssd1306_set_pixel_to_display(x, y);
-	  }
+	  s3[i].x = rand()%DISPLAY_WIDTH;
+	  s3[i].y = rand()%DISPLAY_HEIGTH;
   }
-
-  for(x=0; x<DISPLAY_WIDTH; x++)
-  {
-	  for(y=0; y<DISPLAY_HEIGTH; y++)
-		  ssd1306_clear_pixel_to_display(x, y);
-  }
-
-  ///////////////////////////////////////////////
-
-  for(y=0; y<DISPLAY_HEIGTH; y++)
-  {
-	  for(x=0; x<DISPLAY_WIDTH; x++)
-	  {
-		  ssd1306_set_pixel_to_buffer(x, y);
-	  }
-  }
-  ssd1306_transfer_buffer();
-
-  for(y=0; y<DISPLAY_HEIGTH; y++)
-  {
-	  for(x=0; x<DISPLAY_WIDTH; x++)
-		  ssd1306_clear_pixel_to_buffer(x, y);
-  }
-  ssd1306_transfer_buffer();
-
-  for(x=0; x<DISPLAY_WIDTH; x++)
-  {
-	  for(y=0; y<DISPLAY_HEIGTH; y++)
-	  {
-		  ssd1306_set_pixel_to_buffer(x, y);
-	  }
-  }
-  ssd1306_transfer_buffer();
-
-  for(x=0; x<DISPLAY_WIDTH; x++)
-  {
-	  for(y=0; y<DISPLAY_HEIGTH; y++)
-		  ssd1306_clear_pixel_to_buffer(x, y);
-  }
-  ssd1306_transfer_buffer();
 
   /* USER CODE END 2 */
 
@@ -169,6 +131,23 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  ssd1306_clear_buffer();
+	  for(int i=0; i<STAR_COUNT; i++)
+	  {
+		  ssd1306_set_pixel_to_buffer(s1[i].x, s1[i].y);
+		  ssd1306_set_pixel_to_buffer(s2[i].x, s2[i].y);
+		  ssd1306_set_pixel_to_buffer(s3[i].x, s3[i].y);
+
+		  s1[i].x++;
+		  if(s1[i].x >= DISPLAY_WIDTH) s1[i].x = 0;
+
+		  s2[i].x += 2;
+		  if(s2[i].x >= DISPLAY_WIDTH) s2[i].x -= DISPLAY_WIDTH;
+
+		  s3[i].x += 3;
+		  if(s3[i].x >= DISPLAY_WIDTH) s3[i].x -= DISPLAY_WIDTH;
+	  }
+	  ssd1306_transfer_buffer();
   }
   /* USER CODE END 3 */
 }
